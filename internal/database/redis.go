@@ -2,6 +2,7 @@ package database
 
 import (
 	"context"
+	"log"
 	"time"
 
 	"github.com/redis/go-redis/v9"
@@ -13,6 +14,7 @@ const redisTTL = 24 * time.Hour
 func NewRedis(cfg *config.Config) *redis.Client {
 	opts, err := redis.ParseURL(cfg.RedisURL)
 	if err != nil {
+		log.Printf("redis: failed to parse REDIS_URL, falling back to localhost:6379: %v", err)
 		opts = &redis.Options{Addr: "localhost:6379"}
 	}
 	return redis.NewClient(opts)

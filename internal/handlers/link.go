@@ -3,6 +3,7 @@ package handlers
 import (
 	"fmt"
 	"html"
+	"net/url"
 	"strings"
 	"time"
 
@@ -78,13 +79,18 @@ func (h *Handler) CreateLink(c fiber.Ctx) error {
 		targetURL = "https://" + targetURL
 	}
 
+	parsed, err := url.ParseRequestURI(targetURL)
+	if err != nil || (parsed.Scheme != "http" && parsed.Scheme != "https") || parsed.Host == "" {
+		return c.Status(fiber.StatusBadRequest).SendString("invalid target URL")
+	}
+
 	if err := database.SaveLink(h.pg, slug, targetURL); err != nil {
 		return c.Status(fiber.StatusInternalServerError).SendString("failed to save link")
 	}
 
 	_ = database.CacheSet(h.rdb, slug, targetURL)
 
-	shortLink := fmt.Sprintf("http://%s/%s", h.cfg.AppHost, html.EscapeString(slug))
+	shortLink := fmt.Sprintf("%s://%s/%s", c.Protocol(), h.cfg.AppHost, html.EscapeString(slug))
 	body := fmt.Sprintf(htmlTemplate, shortLink)
 	c.Set(fiber.HeaderContentType, fiber.MIMETextHTMLCharsetUTF8)
 	return c.SendString(body)

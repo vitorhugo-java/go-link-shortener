@@ -38,8 +38,8 @@ func main() {
 		Expiration: time.Minute,
 	}))
 
-	app.Get("/:slug/*", h.CreateLink)
 	app.Get("/:slug", h.RedirectLink)
+	app.Get("/:slug/*", h.CreateLink)
 
 	log.Fatal(app.Listen(":" + cfg.Port))
 }

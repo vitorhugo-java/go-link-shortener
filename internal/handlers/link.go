@@ -90,7 +90,7 @@ func (h *Handler) CreateLink(c fiber.Ctx) error {
 
 	_ = database.CacheSet(h.rdb, slug, targetURL)
 
-	shortLink := fmt.Sprintf("%s://%s/%s", c.Protocol(), h.cfg.AppHost, html.EscapeString(slug))
+	shortLink := fmt.Sprintf("%s://%s/%s", c.Scheme(), h.cfg.AppHost, html.EscapeString(slug))
 	body := fmt.Sprintf(htmlTemplate, shortLink)
 	c.Set(fiber.HeaderContentType, fiber.MIMETextHTMLCharsetUTF8)
 	return c.SendString(body)
